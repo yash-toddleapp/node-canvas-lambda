@@ -1,4 +1,4 @@
-NODE_VERSION=16
+NODE_VERSION=18
 TEST_IMG_NAME=canvas-lambda-test
 
 help:
@@ -15,26 +15,15 @@ build: clean
 		--tag node${NODE_VERSION}-canvas-layers
 	mkdir -p build
 	docker create -ti --name dummy node${NODE_VERSION}-canvas-layers bash
-	docker cp dummy:/root/layers/node${NODE_VERSION}_canvas_lib64_layer.zip build/
 	docker cp dummy:/root/layers/node${NODE_VERSION}_canvas_layer.zip build/
 	docker rm -f dummy
 
-publish-lib:
-	aws lambda publish-layer-version \
-		--layer-name "node${NODE_VERSION}CanvasLib64" \
-		--compatible-runtimes nodejs${NODE_VERSION}.x \
-		--zip-file "fileb://build/node${NODE_VERSION}_canvas_lib64_layer.zip" \
-		--description "Node canvas lib 64"
-
-publish-nodejs:
+publish:
 	aws lambda publish-layer-version \
 		--layer-name "node${NODE_VERSION}Canvas" \
 		--compatible-runtimes nodejs${NODE_VERSION}.x \
 		--zip-file "fileb://build/node${NODE_VERSION}_canvas_layer.zip" \
-		--description "A Lambda Layer which includes node canvas, chart.js, chartjs-node-canvas, chartjs-plugin-datalabels"
-
-publish: build publish-lib publish-nodejs
-
+		--description "A Lambda Layer which includes node canvas and its dependencies"
 
 # This doesn't work for some reason. It would be nice to use this instead of the 
 # `docker build` below then we wouldn't need `test.dockerfile`
@@ -80,16 +69,13 @@ debug: build unzip-layers
 		node${NODE_VERSION}-canvas-layers \
 		/bin/bash
 
-
-unzip-layers: build
-unzip-layers: nodejs
-unzip-layers: lib
+unzip-layers: build nodejs lib
 
 nodejs:
-	unzip build/node${NODE_VERSION}_canvas_layer.zip
+	unzip build/node${NODE_VERSION}_canvas_layer.zip -d .
 
 lib:
-	unzip build/node${NODE_VERSION}_canvas_lib64_layer.zip
+	unzip build/node${NODE_VERSION}_canvas_layer.zip -d .
 
 clean:
 	rm -rf build lib nodejs

@@ -1,6 +1,7 @@
-ARG NODE_VERSION=16
+ARG NODE_VERSION=18
 
-FROM public.ecr.aws/lambda/nodejs:${NODE_VERSION}-arm64
+# FROM public.ecr.aws/lambda/nodejs:${NODE_VERSION}-arm64
+FROM public.ecr.aws/lambda/nodejs:${NODE_VERSION}
 
 # Copy function code
 COPY lib /opt/lib

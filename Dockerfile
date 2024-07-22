@@ -1,12 +1,11 @@
-FROM arm64v8/amazonlinux:latest
+FROM amazon/aws-lambda-nodejs:18
 
 ARG OUT=/root/layers
-ARG NODE_VERSION=16
+ARG NODE_VERSION=18
 
 # set up container
 RUN yum -y update \
 && yum -y groupinstall "Development Tools" \
-&& curl --silent --location https://rpm.nodesource.com/setup_${NODE_VERSION}.x | bash - \
 && yum install -y \
 	nodejs \
 	python37 \
@@ -17,16 +16,15 @@ RUN yum -y update \
 	cairo-devel \
 	libjpeg-turbo-devel \
 	pango-devel \
-	giflib-devel
+	giflib-devel \
+&& yum -y install gcc-c++ cairo-devel pango-devel libjpeg-turbo-devel giflib-devel
 
 # will be created and become working dir
 WORKDIR $OUT/nodejs
 
 RUN npm install --build-from-source \
-canvas@2 \
-chartjs-plugin-datalabels@2 \
-chartjs-node-canvas@4 \
-chart.js@3
+canvas@2.11.2 \
+pdfjs-dist@4.4.168 
 
 # will be created and become working dir
 WORKDIR $OUT/lib
@@ -38,5 +36,5 @@ RUN curl https://raw.githubusercontent.com/ncopa/lddtree/v1.26/lddtree.sh -o $OU
 
 WORKDIR $OUT
 
-RUN zip -r -9 node${NODE_VERSION}_canvas_layer.zip nodejs \
-&& zip -r -9 node${NODE_VERSION}_canvas_lib64_layer.zip lib
+# create a single zip file containing both nodejs and lib directories
+RUN zip -r -9 node${NODE_VERSION}_canvas_layer.zip nodejs lib
