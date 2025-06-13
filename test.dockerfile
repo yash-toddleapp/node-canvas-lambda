@@ -1,4 +1,4 @@
-ARG NODE_VERSION=18
+ARG NODE_VERSION=22
 
 # FROM public.ecr.aws/lambda/nodejs:${NODE_VERSION}-arm64
 FROM public.ecr.aws/lambda/nodejs:${NODE_VERSION}
